@@ -1,53 +1,39 @@
-create table names as select * from read_csv("baby_names_pl/*/*.csv", filename=true, union_by_name=true);
-update names set gender = regexp_replace(gender, '^M.*', 'male');
-update names set gender = regexp_replace(gender, '^K.*', 'female');
-update names set year = regexp_extract(filename, '\d\d\d\d') where year is null;
-update names set first_name = concat(upper(substring(first_name, 1, 1)), lower(substring(first_name, 2)));
-update names set middle_name = concat(upper(substring(middle_name, 1, 1)), lower(substring(middle_name, 2)));
-update names set voivodeship = concat(upper(substring(voivodeship, 1, 1)), lower(substring(voivodeship, 2)));
-
-create table names_dedup as
-select * from names
-qualify row_number() over (partition by middle_name, gender, first_name, voivodeship, year) = 1;
-
 create table first_total as 
     select
-        first_name,
-        gender,
-        year,
-        count,
+        *,
         round(100 * count / sum(count) over (partition by gender, year), 4) as yearly_perc,
         rank() over (partition by gender, year order by count desc) as yearly_rank
-    from names_dedup 
-    where voivodeship is NULL and first_name is not NULL;
+    from read_parquet("./data/first_total.parquet");
 
 create table middle_total as 
     select
-        middle_name,
-        gender,
-        year,
-        count,
+        *,
         round(100 * count / sum(count) over (partition by gender, year), 4) AS yearly_perc,
         rank() over (partition by gender, year order by count desc) as yearly_rank
-    from names_dedup
-    where voivodeship is NULL and middle_name is not NULL;
+    from read_parquet("./data/middle_total.parquet");
 
 create table first_voivodeship as 
     select
-        first_name,
-        gender,
-        year,
-        voivodeship,
-        count,
+        *,
         round(100 * count / sum(count) over (partition by gender, year, voivodeship), 4) AS yearly_perc,
         rank() over (partition by gender, year, voivodeship order by count desc) as yearly_rank
-    from names_dedup
-    where voivodeship is not NULL and first_name is not NULL;
-    -- todo join with country level perc and rank
+    from read_parquet("./data/first_voivodeship.parquet");
 
--- create table middle_voivodeship as select middle_name, gender, year, voivodeship, count, round(100 * count / sum(count) over (partition by year, voivodeship), 4) AS yearly_perc, rank() over (partition by year, voivodeship order by count desc) as yearly_rank from names_dedup where voivodeship is not NULL and middle_name is not NULL;
+-- voivodeship level stats
+select 
+    first_voivodeship.*,
+    first_total.yearly_perc as total_yearly_perc,
+    first_total.yearly_rank as total_yearly_rank,
+    round(first_voivodeship.yearly_perc - total_yearly_perc, 4) as relative_prevalence,
+    round(first_voivodeship.yearly_rank - total_yearly_rank, 4) as relative_rank
+from first_voivodeship
+left join first_total on 
+    first_voivodeship.first_name = first_total.first_name and 
+    first_voivodeship.gender = first_total.gender and 
+    first_voivodeship.year = first_total.year;
 
 -- biggest changes in first name popularity
+-- use top 20 as defaults for time series plot
 with perc2000 as (
     select
         first_name,
@@ -72,12 +58,14 @@ select
     rank2023,
     perc2000,
     perc2023,
-    round(perc2023 - perc2000, 4) as perc_change
-    round(rank2023 - rank2000, 4) as rank_change
+    round(perc2023 - perc2000, 4) as perc_change,
+    round(rank2023 - rank2000, 4) as rank_change,
+    rank() over (order by perc_change desc) as rank_pos_change,
+    rank() over (order by perc_change asc) as rank_neg_change,
 from perc2000
 inner join perc2023
 on perc2000.first_name = perc2023.first_name and perc2000.gender = perc2023.gender
-order by change desc;
+order by perc_change desc;
 
 
 -- first vs second name popularity
