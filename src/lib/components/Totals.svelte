@@ -2,48 +2,38 @@
 
     import { onMount } from 'svelte';
     import * as echarts from 'echarts';
-    import { getDf } from "$lib/utils";
-    import { DataFrame } from "data-forge";
+    import type { DataFrame } from 'data-forge';
+
+    export let df: DataFrame;
+    export let defaultNames: Array<string>;
+    export let uniqNames: Array<string>;
 
     let chartDiv: HTMLDivElement;
 
-    function makeChart(x: Array<any>, y: Array<any>) {
+    function makeChart(x: Array<any>, ys: Array<Array<any>>) {
         var myChart = echarts.init(chartDiv);
+        let series = ys.map(y => {
+            let entry = {data: y, type: 'line'};
+            return entry
+        });
         var option: echarts.EChartOption = {
-            xAxis: {
-                type: 'category',
-                data: x
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [
-                {
-                data: y,
-                type: 'line'
-                }
-            ]
+            xAxis: {type: 'category', data: x},
+            yAxis: {type: 'value'},
+            series: series
         };
 
         myChart.setOption(option);   
     }
 
-
     onMount(async () => {
-        let df: DataFrame = await getDf("names.parquet");
-
-        let uniqNamesDf: DataFrame = await getDf("unique_names.parquet");
-        let uniqNames = uniqNamesDf.deflate(row => String(row.first_name)).toArray();
-        console.log(uniqNames)
+        console.log(defaultNames);
+        console.log(uniqNames); //todo this goes to dropdown options
         
-        let defaultNamesDf: DataFrame = await getDf("change20202023.parquet");
-        let defaultNames = defaultNamesDf.deflate(row => String(row.first_name)).toArray();
-        console.log(defaultNames)
-        
+        // todo create list of y 'traces' for each defaultNames
         let filtered = df.filter(row => row.first_name == 'Jan');
         let years = filtered.deflate(row => Number(row.year)).toArray();
         let counts = filtered.deflate(row => Number(row.count)).toArray();
-        makeChart(years, counts);
+        makeChart(years, [counts, ]);
 	});
 
 </script>

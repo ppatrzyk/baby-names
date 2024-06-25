@@ -2,13 +2,12 @@
 
     import { onMount } from 'svelte';
     import * as echarts from 'echarts';
-    import { getDf } from "$lib/utils";
     import { DataFrame } from "data-forge";
 
     let chartDiv: HTMLDivElement;
 
     onMount(async () => {
-
+        // todo choropleth map and line chart 
 	});
 
 </script>
