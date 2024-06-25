@@ -23,7 +23,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@duckdb/duckdb-wasm": "^1.28.1-dev106.0",
-		"echarts": "^4.9.0"
+		"data-forge": "^1.10.2",
+		"echarts": "^4.9.0",
+		"hyparquet": "^1.0.0"
 	}
 }
