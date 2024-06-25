@@ -4,7 +4,8 @@
 	export let data;
 
     import { onMount } from 'svelte';
-    import TestChart from "$lib/components/TestChart.svelte";
+    import Totals from "$lib/components/Totals.svelte";
+    import Voivodeships from "$lib/components/Voivodeships.svelte";
 
     onMount(async () => {
         console.log(data.test);
@@ -17,7 +18,8 @@
 
 </style>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1>Polish baby names 2000-2023</h1>
+<p>todo description</p>
 
-<TestChart />
+<Totals />
+<Voivodeships />

@@ -3,7 +3,8 @@ create table first_total as
         *,
         round(100 * count / sum(count) over (partition by gender, year), 4) as yearly_perc,
         rank() over (partition by gender, year order by count desc) as yearly_rank
-    from read_parquet("./data/first_total.parquet");
+    from read_parquet("./data/first_total.parquet")
+    order by year asc, first_name asc;
 
 create table middle_total as 
     select
@@ -20,6 +21,12 @@ create table first_voivodeship as
     from read_parquet("./data/first_voivodeship.parquet");
 
 copy first_total to './static/names.parquet' (format parquet);
+copy (
+    select distinct(first_name) as first_name
+    from first_total
+    order by first_name asc
+)
+to './static/unique_names.parquet' (format parquet);
 
 -- voivodeship level stats
 copy (
@@ -34,6 +41,7 @@ copy (
         first_voivodeship.first_name = first_total.first_name and 
         first_voivodeship.gender = first_total.gender and 
         first_voivodeship.year = first_total.year
+    order by first_voivodeship.year asc, first_voivodeship.first_name asc
 )
 to './static/voivodeships.parquet' (format parquet);
 
@@ -75,7 +83,21 @@ copy (
     )
     where rank_pos_change <= 20 or rank_neg_change <= 20
 )
-to './static/change20202023.csv' (format csv);
+to './static/change20202023.parquet' (format parquet);
+
+-- most variability across voivodeships
+copy (
+    select first_name
+    from (
+        select * 
+        from first_voivodeship
+        where year == 2023
+    )
+    group by first_name
+    order by var_pop(yearly_perc) desc
+    limit 20
+)
+to './static/voivodeshipsvar2023.parquet' (format parquet);
 
 -- first vs second name popularity
 select 
