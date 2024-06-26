@@ -13,7 +13,24 @@
 
     let chartDiv: HTMLDivElement;
 
-    function makeChart(x: Array<any>, ys: Array<Array<any>>, ynames: Array<string>) {
+    function updateChart(names: Array<string>) {
+        let traces: Array<Array<any>> = [];
+        names.forEach(name => {
+            let nameDf = df.filter(row => (row.first_name == name));
+            let years = nameDf.deflate(row => Number(row.year)).toArray();
+            let indexMap = uniqYears.map(year => years.includes(year));
+
+            // todo extract to function
+            // null or 0 rethink
+            let counts = nameDf.deflate(row => Number(row.count)).toArray();
+            let countsRev = counts.reverse();
+            let countsFull = indexMap.map(index => (index ? countsRev.pop() : null));
+            traces.push(countsFull);
+        });
+        renderChart(uniqYears, traces, names);
+    }
+
+    function renderChart(x: Array<any>, ys: Array<Array<any>>, ynames: Array<string>) {
         let chart = echarts.init(chartDiv);
         // chart.showLoading();
         let series = ys.map((y, i) => {
@@ -35,22 +52,8 @@
 
     onMount(async () => {
         console.log(uniqNames); //todo this goes to dropdown options
-        
-        let names = changePos.slice(0, 10);
-        let traces: Array<Array<any>> = [];
-        names.forEach(name => {
-            let nameDf = df.filter(row => (row.first_name == name));
-            let years = nameDf.deflate(row => Number(row.year)).toArray();
-            let indexMap = uniqYears.map(year => years.includes(year));
-
-            // todo extract to function
-            // null or 0 rethink
-            let counts = nameDf.deflate(row => Number(row.count)).toArray();
-            let countsRev = counts.reverse();
-            let countsFull = indexMap.map(index => (index ? countsRev.pop() : null));
-            traces.push(countsFull);
-        });
-        makeChart(uniqYears, traces, names);
+        // todo this executed also on some click
+        updateChart(changePos.slice(0, 10));
 	});
 
 </script>
@@ -65,7 +68,7 @@
 
 <h2>Global names</h2>
 
-<p>todo name selectors here</p>
+<p>todo name selectors here, changePos, changeNeg as defaults</p>
 
 <div class="chart" bind:this={ chartDiv }>
 
