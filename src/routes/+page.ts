@@ -30,12 +30,16 @@ export async function load(event: LoadEvent) {
 	let uniqNamesDf: DataFrame = await getDf(event, "unique_names.parquet");
 	let uniqNames = uniqNamesDf.deflate(row => String(row.first_name)).toArray();
 	
-	let defaultNamesDf: DataFrame = await getDf(event, "change20202023.parquet");
-	let defaultNames = defaultNamesDf.deflate(row => String(row.first_name)).toArray();
+	let changeNegDf: DataFrame = await getDf(event, "change_neg.parquet");
+	let changeNeg = changeNegDf.deflate(row => String(row.first_name)).toArray();
+
+    let changePosDf: DataFrame = await getDf(event, "change_pos.parquet");
+	let changePos = changePosDf.deflate(row => String(row.first_name)).toArray();
 	
 	return {
 		df: df,
 		uniqNames: uniqNames,
-		defaultNames: defaultNames
+		changeNeg: changeNeg,
+		changePos: changePos,
 	};
 }

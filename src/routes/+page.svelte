@@ -8,7 +8,6 @@
     import Voivodeships from "$lib/components/Voivodeships.svelte";
 
     onMount(async () => {
-        console.log(data.defaultNames);
         console.log("data init finished?");
 	});
 
@@ -21,5 +20,5 @@
 <h1>Polish baby names 2000-2023</h1>
 <p>todo description</p>
 
-<Totals df={ data.df } defaultNames={ data.defaultNames } uniqNames={ data.uniqNames }/>
+<Totals df={ data.df } changeNeg={ data.changeNeg } changePos={ data.changePos } uniqNames={ data.uniqNames }/>
 <Voivodeships />

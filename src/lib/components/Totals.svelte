@@ -5,35 +5,52 @@
     import type { DataFrame } from 'data-forge';
 
     export let df: DataFrame;
-    export let defaultNames: Array<string>;
+    export let changeNeg: Array<string>;
+    export let changePos: Array<string>;
     export let uniqNames: Array<string>;
+
+    let uniqYears = df.deflate(row => Number(row.year)).distinct().toArray().sort();
 
     let chartDiv: HTMLDivElement;
 
-    function makeChart(x: Array<any>, ys: Array<Array<any>>) {
-        var myChart = echarts.init(chartDiv);
-        let series = ys.map(y => {
-            let entry = {data: y, type: 'line'};
+    function makeChart(x: Array<any>, ys: Array<Array<any>>, ynames: Array<string>) {
+        let chart = echarts.init(chartDiv);
+        // chart.showLoading();
+        let series = ys.map((y, i) => {
+            let entry = {data: y, name: ynames[i], type: 'line'};
             return entry
         });
-        var option: echarts.EChartOption = {
+        let option: echarts.EChartOption = {
+            title: {text: 'Names over time'},
+            // todo other numbers shown in tooltip
+            tooltip: {trigger: 'axis'},
+            legend: {data: ynames},
             xAxis: {type: 'category', data: x},
             yAxis: {type: 'value'},
             series: series
         };
 
-        myChart.setOption(option);   
+        chart.setOption(option);   
     }
 
     onMount(async () => {
-        console.log(defaultNames);
         console.log(uniqNames); //todo this goes to dropdown options
         
-        // todo create list of y 'traces' for each defaultNames
-        let filtered = df.filter(row => row.first_name == 'Jan');
-        let years = filtered.deflate(row => Number(row.year)).toArray();
-        let counts = filtered.deflate(row => Number(row.count)).toArray();
-        makeChart(years, [counts, ]);
+        let names = changePos.slice(0, 10);
+        let traces: Array<Array<any>> = [];
+        names.forEach(name => {
+            let nameDf = df.filter(row => (row.first_name == name));
+            let years = nameDf.deflate(row => Number(row.year)).toArray();
+            let indexMap = uniqYears.map(year => years.includes(year));
+
+            // todo extract to function
+            // null or 0 rethink
+            let counts = nameDf.deflate(row => Number(row.count)).toArray();
+            let countsRev = counts.reverse();
+            let countsFull = indexMap.map(index => (index ? countsRev.pop() : null));
+            traces.push(countsFull);
+        });
+        makeChart(uniqYears, traces, names);
 	});
 
 </script>
@@ -47,6 +64,8 @@
 </style>
 
 <h2>Global names</h2>
+
+<p>todo name selectors here</p>
 
 <div class="chart" bind:this={ chartDiv }>
 
