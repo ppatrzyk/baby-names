@@ -20,5 +20,15 @@
 <h1>Polish baby names 2000-2023</h1>
 <p>todo description</p>
 
-<Totals df={ data.df } changeNeg={ data.changeNeg } changePos={ data.changePos } uniqNames={ data.uniqNames }/>
-<Voivodeships />
+<Totals 
+    df={ data.df }
+    uniqNames={ data.uniqNames }
+    changeNeg={ data.changeNeg }
+    changePos={ data.changePos }
+/>
+
+<Voivodeships 
+    voivodeshipDf={ data.voivodeshipDf }
+    uniqNames={ data.uniqNames }
+    mapJson={ data.mapJson } 
+/>

@@ -3,14 +3,14 @@
     import { onMount } from 'svelte';
     import * as echarts from 'echarts';
     import { DataFrame } from "data-forge";
+    import Select from 'svelte-select';
 
-    export let df: DataFrame;
+    export let voivodeshipDf: DataFrame;
     export let mapJson: Object;
-    // export let uniqNames: Array<string>;
-    // todo how to pass uniq years? one general var?
+    export let uniqNames: Array<string>;
 
-    let chartDiv: HTMLDivElement;
-    let chart: echarts.EChartsType;
+    let uniqYears = voivodeshipDf.deflate(row => String(row.year)).distinct().toArray().sort();
+    // let uniqVoivodeships = voivodeshipDf.deflate(row => String(row.voivodeship)).distinct().toArray().sort();
 
     let fakeData = [
         { name: 'śląskie', value: 4822023 },
@@ -18,11 +18,24 @@
         { name: 'lubuskie', value: 731449 },
     ]
 
-    let currentOption: echarts.EChartOption;
+    $: selectedName = "Mateusz";
+    $: selectedYear = "2023";
+    $: currentOption = mapOption;
+    $: currentData = fakeData;
 
-    let mapOption: echarts.EChartOption = {
+    // let mapOption: echarts.EChartOption;
+    // let barOption: echarts.EChartOption;
+
+    let chartDiv: HTMLDivElement;
+    let chart: echarts.EChartsType;
+
+    // let currentOption: echarts.EChartOption;
+    // currentOption = mapOption;
+
+    $: mapOption = {
         visualMap: {
             left: 'right',
+            // todo fix min max here, taken 0 -actual data max
             min: 500000,
             max: 38000000,
             inRange: {
@@ -39,19 +52,19 @@
                 map: 'PL',
                 animationDurationUpdate: 1000,
                 // universalTransition: true,
-                data: fakeData
+                data: currentData
             }
         ]
     };
 
-    let barOption: echarts.EChartOption = {
+    $: barOption = {
         xAxis: {
             type: 'value'
         },
         yAxis: {
             type: 'category',
             axisLabel: {rotate: 30},
-            data: fakeData.map(function (item) {
+            data: currentData.map(function (item) {
                 return item.name;
             })
         },
@@ -59,24 +72,50 @@
         series: {
             type: 'bar',
             id: 'population',
-            data: fakeData.map(function (item) {
+            data: currentData.map(function (item) {
                 return item.value;
             }),
             universalTransition: true
         }
     };
 
+    function updateData(name: string, year: string) {
+        let nameDf = voivodeshipDf.filter(row => (row.first_name == name && row.year == Number(year)));
+        let voivodeships = nameDf.deflate(row => (row.voivodeship.toLowerCase())).toArray();
+        let counts = nameDf.deflate(row => Number(row.count)).toArray();
+        let data = voivodeships.map((el, i) => {
+            let entry = {name: el, value: counts[i]};
+            return entry
+        });
+        currentData = data;
+        // console.log(data)
+    }
+
+    function updateChart() {
+        updateData(selectedName, selectedYear);
+        // todo if this is necessary
+        chart.setOption(currentOption);
+    }
+
     function toggleMapBar() {
         currentOption = currentOption === mapOption ? barOption : mapOption;
         chart.setOption(currentOption, true);
-        // chart.setOption(barOption)
+    }
+
+    function nameSelected(rawName: Object) {
+        selectedName = rawName.value;
+        updateChart();
+    }
+
+    function yearSelected(rawYear: Object) {
+        selectedYear = rawYear.value;
+        updateChart();
     }
 
     onMount(async () => {
         chart = echarts.init(chartDiv);
         echarts.registerMap('PL', mapJson);
-        chart.setOption(mapOption);
-        currentOption = mapOption;
+        updateChart();
 	});
 
 </script>
@@ -91,6 +130,27 @@
 
 
 <h2>Analysis by voivodeship</h2>
+
+<Select 
+    items={ uniqNames }
+    value={ selectedName }
+    clearable={ false }
+    placeholder="Pick name"
+    class="foo bar"
+    on:input={ (details) => {nameSelected(details.detail)} }
+/>
+
+<Select 
+    items={ uniqYears }
+    value={ selectedYear }
+    clearable={ false }
+    placeholder="Pick year"
+    class="foo bar"
+    on:input={ (details) => {yearSelected(details.detail)} }
+/>
+
+<p>{ selectedName }</p>
+<p>{ selectedYear }</p>
 
 <button on:click={ () => toggleMapBar() }>change map/bar</button>
 

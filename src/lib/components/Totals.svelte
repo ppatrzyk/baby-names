@@ -3,19 +3,23 @@
     import { onMount } from 'svelte';
     import * as echarts from 'echarts';
     import type { DataFrame } from 'data-forge';
+    import Select from 'svelte-select';
 
     export let df: DataFrame;
     export let changeNeg: Array<string>;
     export let changePos: Array<string>;
     export let uniqNames: Array<string>;
-
+    
     let uniqYears = df.deflate(row => Number(row.year)).distinct().toArray().sort();
 
+    $: selectedNames = ["Mateusz", "Nikodem", "Natalia", "Pola", ];
+
+    let chart: echarts.EChartsType;
     let chartDiv: HTMLDivElement;
 
-    function updateChart(names: Array<string>) {
+    function updateChart() {
         let traces: Array<Array<any>> = [];
-        names.forEach(name => {
+        selectedNames.forEach(name => {
             let nameDf = df.filter(row => (row.first_name == name));
             let years = nameDf.deflate(row => Number(row.year)).toArray();
             let indexMap = uniqYears.map(year => years.includes(year));
@@ -27,11 +31,10 @@
             let countsFull = indexMap.map(index => (index ? countsRev.pop() : null));
             traces.push(countsFull);
         });
-        renderChart(uniqYears, traces, names);
+        renderChart(uniqYears, traces, selectedNames);
     }
 
     function renderChart(x: Array<any>, ys: Array<Array<any>>, ynames: Array<string>) {
-        let chart = echarts.init(chartDiv);
         // chart.showLoading();
         let series = ys.map((y, i) => {
             let entry = {data: y, name: ynames[i], type: 'line'};
@@ -47,13 +50,21 @@
             series: series
         };
 
-        chart.setOption(option);   
+        chart.setOption(option, true);   
+    }
+
+    function namesSelected(namesRaw: Array<object> | null) {
+        if (namesRaw != null) {
+            let names: Array<string> = namesRaw.map(el => el.value);
+            // console.log(names);
+            selectedNames = names;
+            updateChart();
+        }
     }
 
     onMount(async () => {
-        console.log(uniqNames); //todo this goes to dropdown options
-        // todo this executed also on some click
-        updateChart(changePos.slice(0, 10));
+        chart = echarts.init(chartDiv);
+        updateChart();
 	});
 
 </script>
@@ -68,7 +79,20 @@
 
 <h2>Global names</h2>
 
-<p>todo name selectors here, changePos, changeNeg as defaults</p>
+<button on:click={ () => { selectedNames = changePos } }>Trend up</button>
+<button on:click={ () => { selectedNames = changeNeg } }>Trand down</button>
+
+<Select 
+    items={ uniqNames }
+    value={ selectedNames }
+    clearable={ true }
+    placeholder="Pick names"
+    class="foo bar"
+    on:input={ (details) => {namesSelected(details.detail)} }
+    multiple
+/>
+
+<p>{ selectedNames }</p>
 
 <div class="chart" bind:this={ chartDiv }>
 
