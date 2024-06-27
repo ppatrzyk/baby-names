@@ -24,7 +24,8 @@
 	"type": "module",
 	"dependencies": {
 		"data-forge": "^1.10.2",
-		"echarts": "^4.9.0",
-		"hyparquet": "^1.0.0"
+		"echarts": "^5.5.0",
+		"hyparquet": "^1.0.0",
+		"svelte-select": "^5.8.3"
 	}
 }
