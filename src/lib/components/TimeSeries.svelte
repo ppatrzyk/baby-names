@@ -8,8 +8,8 @@
     export let df: DataFrame;
     export let changeNeg: Array<string>;
     export let changePos: Array<string>;
-    export let uniqNames: Array<string>;
     
+    let uniqNames = df.deflate(row => String(row.first_name)).distinct().toArray().sort();
     let uniqYears = df.deflate(row => Number(row.year)).distinct().toArray().sort();
 
     $: selectedNames = ["Mateusz", "Nikodem", "Natalia", "Pola", ];
@@ -17,18 +17,22 @@
     let chart: echarts.EChartsType;
     let chartDiv: HTMLDivElement;
 
+    function getYTrace(df: DataFrame, indexMap: Array<boolean>, variable: string) {
+        let trace = df.deflate(row => Number(row[variable])).toArray();
+        let traceRev = trace.reverse();
+        // null or 0 rethink
+        let traceFull = indexMap.map(index => (index ? traceRev.pop() : null));
+        return traceFull
+    }
+
     function updateChart() {
         let traces: Array<Array<any>> = [];
         selectedNames.forEach(name => {
-            let nameDf = df.filter(row => (row.first_name == name));
+            let nameDf = df.filter(row => (row.first_name == name)) as DataFrame;
             let years = nameDf.deflate(row => Number(row.year)).toArray();
             let indexMap = uniqYears.map(year => years.includes(year));
-
-            // todo extract to function
-            // null or 0 rethink
-            let counts = nameDf.deflate(row => Number(row.count)).toArray();
-            let countsRev = counts.reverse();
-            let countsFull = indexMap.map(index => (index ? countsRev.pop() : null));
+            let countsFull = getYTrace(nameDf, indexMap, 'yearly_perc')
+            // let countsFull = getYTrace(nameDf, indexMap, 'yearly_rank')
             traces.push(countsFull);
         });
         renderChart(uniqYears, traces, selectedNames);
@@ -43,10 +47,20 @@
         let option: echarts.EChartOption = {
             title: {text: 'Names over time'},
             // todo other numbers shown in tooltip
-            tooltip: {trigger: 'axis'},
+            tooltip: {trigger: 'axis', order: 'valueDesc', },
             legend: {data: ynames},
-            xAxis: {type: 'category', data: x},
-            yAxis: {type: 'value'},
+            xAxis: {
+                data: x,
+                type: 'category',
+                name: 'year',
+                nameLocation: 'middle',
+                // nameTextStyle: {align: "center"}
+            },
+            yAxis: {
+                type: 'value',
+                name: '% of babies within gender',
+                nameLocation: 'middle',
+            },
             series: series
         };
 
@@ -79,8 +93,16 @@
 
 <h2>Global names</h2>
 
-<button on:click={ () => { selectedNames = changePos } }>Trend up</button>
-<button on:click={ () => { selectedNames = changeNeg } }>Trand down</button>
+<p>
+    Time series on trending names. 
+    <a href="#" on:click={ () => { selectedNames = changePos } }>trending up</a>,
+    <a href="#" on:click={ () => { selectedNames = changeNeg } }>trending down</a>,
+    content
+</p>
+
+<p>
+    todo toggle between yearly_perc and ranking?
+</p>
 
 <Select 
     items={ uniqNames }
@@ -91,8 +113,6 @@
     on:input={ (details) => {namesSelected(details.detail)} }
     multiple
 />
-
-<p>{ selectedNames }</p>
 
 <div class="chart" bind:this={ chartDiv }>
 

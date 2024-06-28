@@ -7,99 +7,102 @@
 
     export let voivodeshipDf: DataFrame;
     export let mapJson: Object;
-    export let uniqNames: Array<string>;
+    
+    // todo better scale
+    let COLORS = ['#070093', '#1c3fbf', '#1482e5', '#70b4eb', '#b4e0f3', '#ffffff'];
 
+    let uniqNames = voivodeshipDf.deflate(row => String(row.first_name)).distinct().toArray().sort();
     let uniqYears = voivodeshipDf.deflate(row => String(row.year)).distinct().toArray().sort();
-    // let uniqVoivodeships = voivodeshipDf.deflate(row => String(row.voivodeship)).distinct().toArray().sort();
-
-    let fakeData = [
-        { name: 'śląskie', value: 4822023 },
-        { name: 'podlaskie', value: 731449 },
-        { name: 'lubuskie', value: 731449 },
-    ]
 
     $: selectedName = "Mateusz";
     $: selectedYear = "2023";
-    $: currentOption = mapOption;
-    $: currentData = fakeData;
-
-    // let mapOption: echarts.EChartOption;
-    // let barOption: echarts.EChartOption;
+    $: currentOption = "map";
+    $: currentData = updateData(selectedName, selectedYear);
 
     let chartDiv: HTMLDivElement;
     let chart: echarts.EChartsType;
 
-    // let currentOption: echarts.EChartOption;
-    // currentOption = mapOption;
-
-    $: mapOption = {
-        visualMap: {
-            left: 'right',
-            // todo fix min max here, taken 0 -actual data max
-            min: 500000,
-            max: 38000000,
-            inRange: {
-                color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
-            },
-            text: ['High', 'Low'],
-            calculable: true
-        },
-        series: [
-            {
-                id: 'test_data',
-                type: 'map',
-                roam: true,
-                map: 'PL',
-                animationDurationUpdate: 1000,
-                // universalTransition: true,
-                data: currentData
-            }
-        ]
-    };
-
-    $: barOption = {
-        xAxis: {
-            type: 'value'
-        },
-        yAxis: {
-            type: 'category',
-            axisLabel: {rotate: 30},
-            data: currentData.map(function (item) {
-                return item.name;
-            })
-        },
-        animationDurationUpdate: 1000,
-        series: {
-            type: 'bar',
-            id: 'population',
-            data: currentData.map(function (item) {
-                return item.value;
-            }),
-            universalTransition: true
-        }
-    };
-
     function updateData(name: string, year: string) {
         let nameDf = voivodeshipDf.filter(row => (row.first_name == name && row.year == Number(year)));
         let voivodeships = nameDf.deflate(row => (row.voivodeship.toLowerCase())).toArray();
-        let counts = nameDf.deflate(row => Number(row.count)).toArray();
+        let perc = nameDf.deflate(row => Number(row.yearly_perc)).toArray();
         let data = voivodeships.map((el, i) => {
-            let entry = {name: el, value: counts[i]};
+            let entry = {name: el, value: perc[i]};
             return entry
         });
-        currentData = data;
-        // console.log(data)
+        // currentData = data;
+        return data
     }
 
     function updateChart() {
-        updateData(selectedName, selectedYear);
-        // todo if this is necessary
-        chart.setOption(currentOption);
+        currentData = updateData(selectedName, selectedYear);
+        if (currentData.length == 0) {
+            // todo think what in this case
+            alert('no data')
+            return false
+        }
+        let option: echarts.EChartOption;
+        if (currentOption == "map") {
+            let values = currentData.map(el => el.value);
+            option = {
+                visualMap: {
+                    left: 'right',
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                    inRange: {color: COLORS},
+                    text: ['High', 'Low'],
+                    calculable: true
+                },
+                tooltip: {trigger: 'item'},
+                series: [
+                    {
+                        id: 'perc_year',
+                        name: '% of babies within gender',
+                        type: 'map',
+                        roam: true,
+                        map: 'PL',
+                        animationDurationUpdate: 1000,
+                        // universalTransition: true,
+                        data: currentData
+                    }
+                ]
+            };
+        } else {
+            option = {
+                xAxis: {
+                    type: 'value',
+                    name: '% of babies within gender',
+                    nameLocation: 'middle',
+                },
+                yAxis: {
+                    type: 'category',
+                    inverse: true,
+                    axisLabel: {rotate: 30},
+                    data: currentData.map(function (item) {
+                        return item.name;
+                    })
+                },
+                tooltip: {trigger: 'axis', order: 'valueDesc', },
+                animationDurationUpdate: 1000,
+                series: {
+                    type: 'bar',
+                    id: 'yearly_perc',
+                    realtimeSort: true,
+                    data: currentData.map(function (item) {
+                        return item.value;
+                    }),
+                    universalTransition: true
+                }
+            };
+        }
+        option.title = {text: `${selectedName} ${selectedYear}`};
+        chart.setOption(option, true);
+        return true
     }
 
     function toggleMapBar() {
-        currentOption = currentOption === mapOption ? barOption : mapOption;
-        chart.setOption(currentOption, true);
+        currentOption = currentOption === "map" ? "bar" : "map";
+        updateChart();
     }
 
     function nameSelected(rawName: Object) {
@@ -124,12 +127,18 @@
     /* todo calculate dynamically */
     .chart {
         width: 100%;
-        height: 400px;
+        height: 800px;
     }
 </style>
 
 
 <h2>Analysis by voivodeship</h2>
+
+<p>todo description</p>
+
+<p>
+    todo show dotted line with country-level perc?
+</p>
 
 <Select 
     items={ uniqNames }
@@ -148,9 +157,6 @@
     class="foo bar"
     on:input={ (details) => {yearSelected(details.detail)} }
 />
-
-<p>{ selectedName }</p>
-<p>{ selectedYear }</p>
 
 <button on:click={ () => toggleMapBar() }>change map/bar</button>
 

@@ -34,9 +34,6 @@ export async function load(event: LoadEvent) {
 	let df: DataFrame = await getDf(event, "names.parquet", "first_name");
     // todo multiple indices voivod+name?
 	let voivodeshipDf: DataFrame = await getDf(event, "voivodeships.parquet", "first_name");
-
-	let uniqNamesDf: DataFrame = (await getDf(event, "unique_names.parquet", "first_name"));
-	let uniqNames = uniqNamesDf.deflate(row => String(row.first_name)).toArray();
 	
 	let changeNegDf: DataFrame = await getDf(event, "change_neg.parquet", "first_name");
 	let changeNeg = changeNegDf.deflate(row => String(row.first_name)).toArray();
@@ -52,7 +49,6 @@ export async function load(event: LoadEvent) {
 	return {
 		df: df,
         voivodeshipDf: voivodeshipDf,
-		uniqNames: uniqNames,
 		changeNeg: changeNeg,
 		changePos: changePos,
         mapJson: mapJson,

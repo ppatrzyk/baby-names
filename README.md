@@ -16,3 +16,9 @@ bash extract.sh
 ```
 cat analysis.sql | duckdb
 ```
+
+todo while redo analysis.sql
+todo trash unique_names.parquet
+
+todo more defaults for time series
+todo add table component for ranking
