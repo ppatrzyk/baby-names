@@ -6,6 +6,7 @@
     import { onMount } from 'svelte';
     import TimeSeries from "$lib/components/TimeSeries.svelte";
     import Voivodeships from "$lib/components/Voivodeships.svelte";
+    import Ranking from '$lib/components/Ranking.svelte';
 
     onMount(async () => {
         console.log("data init finished?");
@@ -24,6 +25,10 @@
     df={ data.df }
     changeNeg={ data.changeNeg }
     changePos={ data.changePos }
+/>
+
+<Ranking 
+    df={ data.df }
 />
 
 <Voivodeships 
