@@ -26,6 +26,7 @@
 		"data-forge": "^1.10.2",
 		"echarts": "^5.5.0",
 		"hyparquet": "^1.0.0",
+		"simple-datatables": "^9.0.4",
 		"svelte-select": "^5.8.3"
 	}
 }

@@ -22,3 +22,9 @@ todo trash unique_names.parquet
 
 todo more defaults for time series
 todo add table component for ranking
+
+todo some histogram variability by year
+this% of babies has only 10 names etc
+
+https://fiduswriter.github.io/simple-datatables/documentation/
+https://www.npmjs.com/package/simple-datatables

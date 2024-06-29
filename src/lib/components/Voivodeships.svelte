@@ -12,6 +12,7 @@
     let COLORS = ['#070093', '#1c3fbf', '#1482e5', '#70b4eb', '#b4e0f3', '#ffffff'];
 
     let uniqNames = voivodeshipDf.deflate(row => String(row.first_name)).distinct().toArray().sort();
+    // only string works with select component
     let uniqYears = voivodeshipDf.deflate(row => String(row.year)).distinct().toArray().sort();
 
     $: selectedName = "Mateusz";
