@@ -11,37 +11,29 @@
     let uniqYears = df.deflate(row => String(row.year)).distinct().toArray().sort();
     let uniqGenders = ["male", "female", ];
 
+    let table: HTMLElement;
     let dataTable: DataTable;
 
     $: selectedYear = "2023";
     $: selectedGender = "male";
 
     function updateTable() {
-        // todo sorting fails here on percent col
         let ranking = df
             .filter(row => (row.year == Number(selectedYear) && row.gender == selectedGender))
             .subset(["yearly_rank", "first_name", "yearly_perc"])
-            .orderBy(row => row["yearly_rank"]);
+            .orderBy(row => row["yearly_rank"])
+            .renameSeries({"yearly_rank": "Ranking", "first_name": "First name", "yearly_perc": "% of babies"});
         let data = {
             "headings": ranking.getColumnNames(),
             "data": ranking.toRows(),
         }
-        try {
-            dataTable.destroy();
-        } catch (error) {
-            // ok, on initial render
-        }
-        dataTable = new DataTable("#ranking-table", {
+        table.replaceChildren();
+        dataTable = new DataTable(table, {
             data: data,
+            sortable: false,
             perPage: 20,
             perPageSelect: false,
-            classes: {
-                // top: "pure-form",
-                // bottom: "datatable-container",
-                // table: "pure-table pure-table-striped",
-                // search: "datatable-search bottom-margin",
-                // dropdown: "datatable-dropdown bottom-margin"
-            },
+            classes: {table: "striped mytable", },
         });
     }
 
@@ -62,29 +54,43 @@
 </script>
 
 <style>
-
+    .mytable {
+        margin: 0;
+    }
 </style>
 
-<h2>Global ranking { selectedYear }</h2>
+<h2>Yearly ranking { selectedYear }</h2>
 
-<Select 
-    items={ uniqYears }
-    value={ selectedYear }
-    clearable={ true }
-    placeholder="Pick year"
-    class="foo bar"
-    on:input={ (details) => {yearSelected(details.detail)} }
-/>
+<p>Ranking for { selectedGender } names in { selectedYear }.</p>
 
-<Select 
-    items={ uniqGenders }
-    value={ selectedGender }
-    clearable={ true }
-    placeholder="Pick gender"
-    class="foo bar"
-    on:input={ (details) => {genderSelected(details.detail)} }
-/>
+<fieldset class="grid">
+    <label for="">
+        Year
+        <Select 
+            --font-size="--pico-font-size"
+            items={ uniqYears }
+            value={ selectedYear }
+            clearable={ true }
+            placeholder="Pick year"
+            class="foo bar"
+            on:input={ (details) => {yearSelected(details.detail)} }
+        />
+    </label>
 
-<div id="ranking-table">
+    <label for="">
+        Gender
+        <Select 
+            --font-size="--pico-font-size"
+            items={ uniqGenders }
+            value={ selectedGender }
+            clearable={ true }
+            placeholder="Pick gender"
+            class="foo bar"
+            on:input={ (details) => {genderSelected(details.detail)} }
+        />
+    </label>
+</fieldset>
+
+<div bind:this={ table }>
 
 </div>

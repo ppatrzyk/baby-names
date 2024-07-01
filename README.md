@@ -17,14 +17,6 @@ bash extract.sh
 cat analysis.sql | duckdb
 ```
 
-todo while redo analysis.sql
-todo trash unique_names.parquet
+## Sources
 
-todo more defaults for time series
-todo add table component for ranking
-
-todo some histogram variability by year
-this% of babies has only 10 names etc
-
-https://fiduswriter.github.io/simple-datatables/documentation/
-https://www.npmjs.com/package/simple-datatables
+[Otwarte dane](https://dane.gov.pl/pl/dataset/219) (CC0 1.0)

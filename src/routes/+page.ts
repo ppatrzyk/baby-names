@@ -32,7 +32,6 @@ async function getJson(event: LoadEvent, url:string) {
 /** @type {import('./$types').PageLoad} */
 export async function load(event: LoadEvent) {
 	let df: DataFrame = await getDf(event, "names.parquet", "first_name");
-    // todo multiple indices voivod+name?
 	let voivodeshipDf: DataFrame = await getDf(event, "voivodeships.parquet", "first_name");
 	
 	let changeNegDf: DataFrame = await getDf(event, "change_neg.parquet", "first_name");
@@ -40,6 +39,9 @@ export async function load(event: LoadEvent) {
 
     let changePosDf: DataFrame = await getDf(event, "change_pos.parquet", "first_name");
 	let changePos = changePosDf.deflate(row => String(row.first_name)).toArray();
+
+    let voivodeshipChangeDf: DataFrame = await getDf(event, "voivodeshipsvar2023.parquet", "first_name");
+	let voivodeshipChange = voivodeshipChangeDf.deflate(row => String(row.first_name)).toArray();
 
     let mapJson = await getJson(event, "wojewodztwa-min.geojson");
     mapJson.features.forEach(entry => {
@@ -51,6 +53,7 @@ export async function load(event: LoadEvent) {
         voivodeshipDf: voivodeshipDf,
 		changeNeg: changeNeg,
 		changePos: changePos,
+        voivodeshipChange: voivodeshipChange,
         mapJson: mapJson,
 	};
 }

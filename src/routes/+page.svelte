@@ -9,7 +9,7 @@
     import Ranking from '$lib/components/Ranking.svelte';
 
     onMount(async () => {
-        console.log("data init finished?");
+        // 
 	});
 
 </script>
@@ -19,7 +19,16 @@
 </style>
 
 <h1>Polish baby names 2000-2023</h1>
-<p>todo description</p>
+
+<p>
+    Interactive visualization of polish baby names data.
+</p>
+
+<small>
+    Author: <a href="https://www.patrzyk.me/">Piotr Patrzyk</a> <br>
+    Source code: <a href="https://github.com/ppatrzyk/baby-names">github.com/ppatrzyk/baby-names</a> <br>
+    Data source: <a href="https://dane.gov.pl/pl/dataset/219">Otwarte dane</a> (CC0 1.0)
+</small>
 
 <TimeSeries 
     df={ data.df }
@@ -33,5 +42,6 @@
 
 <Voivodeships 
     voivodeshipDf={ data.voivodeshipDf }
+    voivodeshipChange={ data.voivodeshipChange }
     mapJson={ data.mapJson } 
 />

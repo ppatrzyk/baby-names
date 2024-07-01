@@ -12,7 +12,10 @@
     let uniqNames = df.deflate(row => String(row.first_name)).distinct().toArray().sort();
     let uniqYears = df.deflate(row => Number(row.year)).distinct().toArray().sort();
 
-    $: selectedNames = ["Mateusz", "Nikodem", "Natalia", "Pola", ];
+    let namesDz = uniqNames.filter(name => name.toLowerCase().includes("dż"));
+    let brians = ["Brian", "Brajan", "Braian", "Brayan", "Bryan"];
+
+    $: selectedNames = ["Mateusz", "Antoni", "Natalia", "Zofia", ];
 
     let chart: echarts.EChartsType;
     let chartDiv: HTMLDivElement;
@@ -88,31 +91,38 @@
     .chart {
         width: 100%;
         height: 400px;
+        margin: var(--pico-typography-spacing-vertical) 0;
     }
 </style>
 
-<h2>Global names</h2>
+<h2 id="ts-section">Names over time</h2>
 
 <p>
-    Time series on trending names. 
-    <a href="#" on:click={ () => { selectedNames = changePos } }>trending up</a>,
-    <a href="#" on:click={ () => { selectedNames = changeNeg } }>trending down</a>,
-    content
+    Name popularity over time. Pick ones that interest you, or see for example:
 </p>
 
-<p>
-    todo toggle between yearly_perc and ranking?
-</p>
+<ul>
+    <li><a href="#ts-section" on:click={ () => { selectedNames = changePos } }>growing in popularity</a>,</li>
+    <li><a href="#ts-section" on:click={ () => { selectedNames = changeNeg } }>decreasing in popularity</a>,</li>
+    <li><a href="#ts-section" on:click={ () => { selectedNames = namesDz } }>names that contain <em>dż</em></a>,</li>
+    <li><a href="#ts-section" on:click={ () => { selectedNames = brians } }><em>Brian</em> variations</a>.</li>
+</ul>
 
-<Select 
-    items={ uniqNames }
-    value={ selectedNames }
-    clearable={ true }
-    placeholder="Pick names"
-    class="foo bar"
-    on:input={ (details) => {namesSelected(details.detail)} }
-    multiple
-/>
+<fieldset class="grid">
+    <label for="">
+        Names
+        <Select 
+            --font-size="--pico-font-size"
+            items={ uniqNames }
+            value={ selectedNames }
+            clearable={ true }
+            placeholder="Pick names"
+            class="foo bar"
+            on:input={ (details) => {namesSelected(details.detail)} }
+            multiple
+        />
+    </label>
+</fieldset>
 
 <div class="chart" bind:this={ chartDiv }>
 

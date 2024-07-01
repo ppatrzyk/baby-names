@@ -6,10 +6,18 @@
     import Select from 'svelte-select';
 
     export let voivodeshipDf: DataFrame;
+    export let voivodeshipChange: Array<String>;
     export let mapJson: Object;
     
     // todo better scale
-    let COLORS = ['#070093', '#1c3fbf', '#1482e5', '#70b4eb', '#b4e0f3', '#ffffff'];
+    let COLORS = [
+        "#fde725",
+        "#7ad151",
+        "#22a884",
+        "#2a788e",
+        "#414487",
+        '#440154',
+    ].reverse();
 
     let uniqNames = voivodeshipDf.deflate(row => String(row.first_name)).distinct().toArray().sort();
     // only string works with select component
@@ -129,37 +137,52 @@
     .chart {
         width: 100%;
         height: 800px;
+        margin: var(--pico-typography-spacing-vertical) 0;
     }
+
 </style>
 
 
-<h2>Analysis by voivodeship</h2>
-
-<p>todo description</p>
+<h2 id="voivodeships-section">Popularity by voivodeship</h2>
 
 <p>
-    todo show dotted line with country-level perc?
+    Prevalence of name { selectedName } in { selectedYear }. Names having biggest variability across locations include:
+    {#each voivodeshipChange as name}
+        <span><a href="#voivodeships-section" on:click={ () => { selectedName = name } }>{ name }</a>, </span>
+    {/each}
 </p>
 
-<Select 
-    items={ uniqNames }
-    value={ selectedName }
-    clearable={ false }
-    placeholder="Pick name"
-    class="foo bar"
-    on:input={ (details) => {nameSelected(details.detail)} }
-/>
 
-<Select 
-    items={ uniqYears }
-    value={ selectedYear }
-    clearable={ false }
-    placeholder="Pick year"
-    class="foo bar"
-    on:input={ (details) => {yearSelected(details.detail)} }
-/>
 
-<button on:click={ () => toggleMapBar() }>change map/bar</button>
+<fieldset class="grid">
+    <label for="">
+        Name
+        <Select 
+            --font-size="--pico-font-size"
+            items={ uniqNames }
+            value={ selectedName }
+            clearable={ false }
+            placeholder="Pick name"
+            class="foo bar"
+            on:input={ (details) => {nameSelected(details.detail)} }
+        />
+    </label>
+
+    <label for="">
+        Year
+        <Select 
+            --font-size="--pico-font-size"
+            items={ uniqYears }
+            value={ selectedYear }
+            clearable={ false }
+            placeholder="Pick year"
+            class="foo bar"
+            on:input={ (details) => {yearSelected(details.detail)} }
+        />
+    </label>
+</fieldset>
+
+<button on:click={ () => toggleMapBar() }>change chart type [map/bar]</button>
 
 <div class="chart" bind:this={ chartDiv }>
 

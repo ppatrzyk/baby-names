@@ -1,5 +1,5 @@
 <script lang="ts">
-    
+    import "@picocss/pico";
 </script>
 
 <style>
@@ -12,6 +12,10 @@
         margin: 4em auto 4em auto;
     }
 </style>
+
+<svelte:head>
+	<title>Baby names</title>
+</svelte:head>
 
 <main id="main-document">
     <slot />

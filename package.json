@@ -23,6 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@picocss/pico": "^2.0.6",
 		"data-forge": "^1.10.2",
 		"echarts": "^5.5.0",
 		"hyparquet": "^1.0.0",
