@@ -46,7 +46,6 @@
     function updateChart() {
         currentData = updateData(selectedName, selectedYear);
         if (currentData.length == 0) {
-            // todo think what in this case
             alert('no data')
             return false
         }
@@ -81,6 +80,7 @@
                 xAxis: {
                     type: 'value',
                     name: '% of babies within gender',
+                    nameGap: 30,
                     nameLocation: 'middle',
                 },
                 yAxis: {
@@ -104,7 +104,7 @@
                 }
             };
         }
-        option.title = {text: `${selectedName} ${selectedYear}`};
+        option.title = {text: `${selectedName} (${selectedYear})`};
         chart.setOption(option, true);
         return true
     }
@@ -142,17 +142,14 @@
 
 </style>
 
-
 <h2 id="voivodeships-section">Popularity by voivodeship</h2>
 
 <p>
-    Prevalence of name { selectedName } in { selectedYear }. Names having biggest variability across locations include:
+    Prevalence of name { selectedName } in { selectedYear }. Names having biggest variability across locations in 2023 include:
     {#each voivodeshipChange as name}
         <span><a href="#voivodeships-section" on:click={ () => { selectedName = name } }>{ name }</a>, </span>
     {/each}
 </p>
-
-
 
 <fieldset class="grid">
     <label for="">

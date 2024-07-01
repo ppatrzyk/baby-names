@@ -20,3 +20,5 @@ cat analysis.sql | duckdb
 ## Sources
 
 [Otwarte dane](https://dane.gov.pl/pl/dataset/219) (CC0 1.0)
+
+todo legend-title overlaps, svelte internationalization

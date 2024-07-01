@@ -20,6 +20,38 @@ create table first_voivodeship as
         rank() over (partition by gender, year, voivodeship order by count desc) as yearly_rank
     from read_parquet("./data/first_voivodeship.parquet");
 
+-- update names that work for both genders
+create table ambiguous as 
+    with male as (
+        select distinct(first_name) as name
+        from first_total
+        where gender = 'male'
+    ), female as (
+        select distinct(first_name) as name
+        from first_total
+        where gender = 'female'
+    )
+    select male.name
+    from male
+    inner join female
+    on male.name = female.name;
+
+update first_total
+set first_name = (
+    case when ((select count(*) from ambiguous where name = first_name) > 0) 
+    then concat(first_name, '[', substring(gender, 1, 1), ']')
+    else first_name
+    end
+);
+
+update first_voivodeship
+set first_name = (
+    case when ((select count(*) from ambiguous where name = first_name) > 0) 
+    then concat(first_name, '[', substring(gender, 1, 1), ']')
+    else first_name
+    end
+);
+
 -- global names stats
 copy first_total to './static/names.parquet' (format parquet);
 
@@ -48,15 +80,15 @@ create table changes as
         count(*) as total_years,
         sum(count) as total_count,
         corr(year, count) as cor,
-        regr_slope(year, count) as slope,
+        arg_max(yearly_perc, year) - arg_min(yearly_perc, year) as change20202023
     from first_total
     group by first_name;
 
 copy (
     select first_name
     from changes
-    where (total_count/(select max(total_count) from changes) >= 0.005)
-    order by cor asc
+    -- where min_max_diff > 0.5
+    order by change20202023 asc
     limit 10
 )
 to './static/change_neg.parquet' (format parquet);
@@ -64,8 +96,8 @@ to './static/change_neg.parquet' (format parquet);
 copy (
     select first_name
     from changes
-    where (total_count/(select max(total_count) from changes) >= 0.005)
-    order by cor desc
+    -- where min_max_diff > 0.5
+    order by change20202023 desc
     limit 10
 )
 to './static/change_pos.parquet' (format parquet);
@@ -80,6 +112,6 @@ copy (
     )
     group by first_name
     order by var_pop(yearly_perc) desc
-    limit 10
+    limit 20
 )
 to './static/voivodeshipsvar2023.parquet' (format parquet);

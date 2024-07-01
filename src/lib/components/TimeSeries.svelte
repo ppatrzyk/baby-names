@@ -50,18 +50,20 @@
         let option: echarts.EChartOption = {
             title: {text: 'Names over time'},
             // todo other numbers shown in tooltip
-            tooltip: {trigger: 'axis', order: 'valueDesc', },
+            tooltip: {trigger: 'axis', order: 'valueDesc'},
             legend: {data: ynames},
             xAxis: {
                 data: x,
                 type: 'category',
                 name: 'year',
+                nameGap: 30,
                 nameLocation: 'middle',
                 // nameTextStyle: {align: "center"}
             },
             yAxis: {
                 type: 'value',
                 name: '% of babies within gender',
+                nameGap: 30,
                 nameLocation: 'middle',
             },
             series: series
