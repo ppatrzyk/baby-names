@@ -29,7 +29,9 @@
 </p>
 
 <p>
-    Interactive visualization of polish baby names data. For names that appear in both genders, <em>[m]/[f]</em> denotes version. Original data source lists only names with at least 2 occurences in reporting area/period so the numbers here are not fully accurate.
+    Interactive visualization of polish baby names data. 
+    For names that appear in both genders, <em>[m]/[f]</em> denotes version. 
+    Original data source lists only names with at least 2 occurrences in reporting area/period.
 </p>
 
 <TimeSeries 
