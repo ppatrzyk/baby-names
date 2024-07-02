@@ -6,6 +6,9 @@
     :root {
         font-family: system-ui, sans-serif;
     }
+    :global(html) {
+        background-image: linear-gradient(to right bottom, rgb(255, 255, 255) , rgb(250, 250, 250));
+    }
     #main-document {
         max-width: 1024px;
         width: 75%;

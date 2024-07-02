@@ -21,14 +21,16 @@
 <h1>Polish baby names 2000-2023</h1>
 
 <p>
-    Interactive visualization of polish baby names data.
+    <small>
+        Author: <a href="https://www.patrzyk.me/">Piotr Patrzyk</a> <br>
+        Source code: <a href="https://github.com/ppatrzyk/baby-names">github.com/ppatrzyk/baby-names</a> <br>
+        Data source: <a href="https://dane.gov.pl/pl/dataset/219">Otwarte dane</a> (CC0 1.0)
+    </small>    
 </p>
 
-<small>
-    Author: <a href="https://www.patrzyk.me/">Piotr Patrzyk</a> <br>
-    Source code: <a href="https://github.com/ppatrzyk/baby-names">github.com/ppatrzyk/baby-names</a> <br>
-    Data source: <a href="https://dane.gov.pl/pl/dataset/219">Otwarte dane</a> (CC0 1.0)
-</small>
+<p>
+    Interactive visualization of polish baby names data. For names that appear in both genders, <em>[m]/[f]</em> denotes version. Original data source lists only names with at least 2 occurences in reporting area/period so the numbers here are not fully accurate.
+</p>
 
 <TimeSeries 
     df={ data.df }

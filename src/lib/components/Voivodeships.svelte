@@ -58,7 +58,7 @@
                     min: Math.min(...values),
                     max: Math.max(...values),
                     inRange: {color: COLORS},
-                    text: ['High', 'Low'],
+                    text: ['% of babies', ''],
                     calculable: true
                 },
                 tooltip: {trigger: 'item'},
@@ -70,7 +70,6 @@
                         roam: true,
                         map: 'PL',
                         animationDurationUpdate: 1000,
-                        // universalTransition: true,
                         data: currentData
                     }
                 ]
@@ -95,6 +94,7 @@
                 animationDurationUpdate: 1000,
                 series: {
                     type: 'bar',
+                    color: '#0172ad',
                     id: 'yearly_perc',
                     realtimeSort: true,
                     data: currentData.map(function (item) {
@@ -104,7 +104,7 @@
                 }
             };
         }
-        option.title = {text: `${selectedName} (${selectedYear})`};
+        option.title = {text: `${selectedName} (${selectedYear})`, textStyle: {fontSize: '24px'}};
         chart.setOption(option, true);
         return true
     }

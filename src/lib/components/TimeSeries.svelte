@@ -14,6 +14,7 @@
 
     let namesDz = uniqNames.filter(name => name.toLowerCase().includes("dż"));
     let brians = ["Brian", "Brajan", "Braian", "Brayan", "Bryan"];
+    let oliwiers = ["Oliwier", "Oliwer", "Oliver", "Olivier"];
 
     $: selectedNames = ["Mateusz", "Antoni", "Natalia", "Zofia", ];
 
@@ -48,8 +49,6 @@
             return entry
         });
         let option: echarts.EChartOption = {
-            title: {text: 'Names over time'},
-            // todo other numbers shown in tooltip
             tooltip: {trigger: 'axis', order: 'valueDesc'},
             legend: {data: ynames},
             xAxis: {
@@ -63,7 +62,7 @@
             yAxis: {
                 type: 'value',
                 name: '% of babies within gender',
-                nameGap: 30,
+                nameGap: 36,
                 nameLocation: 'middle',
             },
             series: series
@@ -108,6 +107,7 @@
     <li><a href="#ts-section" on:click={ () => { selectedNames = changeNeg } }>decreasing in popularity</a>,</li>
     <li><a href="#ts-section" on:click={ () => { selectedNames = namesDz } }>names that contain <em>dż</em></a>,</li>
     <li><a href="#ts-section" on:click={ () => { selectedNames = brians } }><em>Brian</em> variations</a>.</li>
+    <li><a href="#ts-section" on:click={ () => { selectedNames = oliwiers } }><em>Oliwier</em> variations</a>.</li>
 </ul>
 
 <fieldset class="grid">
